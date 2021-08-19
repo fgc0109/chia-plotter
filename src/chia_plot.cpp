@@ -225,6 +225,7 @@ int main(int argc, char** argv)
 	std::string tmp_dir;
 	std::string tmp_dir2;
 	std::string final_dir;
+	std::string final_dir_ext;
 	int num_plots = 1;
 	int num_threads = 4;
 	int num_buckets = 256;
@@ -240,6 +241,7 @@ int main(int argc, char** argv)
 		"t, tmpdir", "Temporary directory, needs ~220 GiB (default = $PWD)", cxxopts::value<std::string>(tmp_dir))(
 		"2, tmpdir2", "Temporary directory 2, needs ~110 GiB [RAM] (default = <tmpdir>)", cxxopts::value<std::string>(tmp_dir2))(
 		"d, finaldir", "Final directory (default = <tmpdir>)", cxxopts::value<std::string>(final_dir))(
+		"e, finaldir_ext", "Final directory extend (default = none)", cxxopts::value<std::string>(final_dir_ext))(
 		"w, waitforcopy", "Wait for copy to start next plot", cxxopts::value<bool>(waitforcopy))(
 		"p, poolkey", "Pool Public Key (48 bytes)", cxxopts::value<std::string>(pool_key_str))(
 		"c, contract", "Pool Contract Address (62 chars)", cxxopts::value<std::string>(contract_addr_str))(
@@ -461,6 +463,11 @@ int main(int argc, char** argv)
 			copy_thread.take_copy(std::make_pair(out.plot_file_name, dst_path));
 			if(waitforcopy) {
 				copy_thread.wait();
+			}
+			if(!final_dir_ext.empty()) {
+				const auto dst_path_ext = final_dir_ext + out.params.plot_name + ".plot";
+				std::cout << "File will move to " << dst_path_ext << std::endl;
+				copy_thread.take_copy(std::make_pair(dst_path, dst_path_ext));
 			}
 		}
 		else if(tmptoggle) {
